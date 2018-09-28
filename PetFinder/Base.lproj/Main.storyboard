@@ -68,7 +68,7 @@
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="znQ-VW-ZAH"/>
                                 </connections>
                             </tableView>
-                            <searchBar contentMode="redraw" placeholder="Search for your new pet" translatesAutoresizingMaskIntoConstraints="NO" id="Vnm-Z1-Hc3">
+                            <searchBar contentMode="redraw" text="Rabbit" placeholder="Search for your new pet" translatesAutoresizingMaskIntoConstraints="NO" id="Vnm-Z1-Hc3">
                                 <rect key="frame" x="0.0" y="20" width="320" height="56"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <connections>

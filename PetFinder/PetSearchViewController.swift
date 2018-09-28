@@ -13,6 +13,9 @@ class PetSearchViewController: UIViewController {
 	@IBOutlet weak var searchBar: UISearchBar!
 	@IBOutlet weak var tableview: UITableView!
 	
+	
+	
+	
 	var didSearch = false
 	var searchResults = [String]()
 	
@@ -22,6 +25,31 @@ class PetSearchViewController: UIViewController {
 		
 		//lowers the table view below the search bar so the first cell is seen
 		tableview.contentInset = UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0	)
+		//performs initial search will remove when other types are searchable
+		if let jsonString = performPetSearchRequest(with: petFinderURL(searchText: "rabbit")) {
+			print("Received Animals \(jsonString)")
+		}
+			
+		
+	}
+	
+	func petFinderURL(searchText: String) -> URL {
+		let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
+		
+		let urlString = String(format: "https://api.petfinder.com/pet.find?key=d62ea251b3e02d378ee3dcfbb39b37db&animal=%@&location=Raleigh,NC&format=json", encodedText)
+		
+		let url = URL(string: urlString)
+		print("This is the url '\(urlString)'")
+		return url!
+	}
+	
+	func performPetSearchRequest(with url: URL) -> String? {
+		do {
+			return try String(contentsOf: url, encoding: .utf8)
+		} catch {
+			print("Download Error: \(error.localizedDescription)")
+			return nil
+		}
 	}
 
 
@@ -30,13 +58,17 @@ class PetSearchViewController: UIViewController {
 extension PetSearchViewController: UISearchBarDelegate {
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 		didSearch = true
+		searchBar.resignFirstResponder()
 		searchResults = []
 		for _ in 0...2 {
 			searchResults.append("\(searchBar.text!) Name")
 			
 		}
+		
+		
+		
 		tableview.reloadData()
-		searchBar.resignFirstResponder()
+		
 	}
 	
 	
