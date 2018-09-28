@@ -14,7 +14,8 @@ class PetSearchViewController: UIViewController {
 	@IBOutlet weak var tableview: UITableView!
 	
 	var searchResults = [String]()
-
+	
+//1352
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
@@ -29,8 +30,8 @@ extension PetSearchViewController: UISearchBarDelegate {
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 		
 		searchResults = []
-		for i in 0...2 {
-			searchResults.append("the search return order \(i) \(searchBar.text!)")
+		for _ in 0...2 {
+			searchResults.append("\(searchBar.text!) Name")
 			
 		}
 		tableview.reloadData()
@@ -50,16 +51,16 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 	}
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		let cellIdentifier = "SearchResultCell"
 		
-		var cell:UITableViewCell! = tableView.dequeueReusableCell(withIdentifier: "SearchResultCell")
 		
-		if cell == nil {
-			cell = UITableViewCell(style: .default, reuseIdentifier: cellIdentifier)
-			
-		}
+		let cell = tableView.dequeueReusableCell(withIdentifier: "searchResultCell", for: indexPath)
+		let imageView = cell.viewWithTag(1000) as! UIImageView
+		let nameLabel = cell.viewWithTag(1001) as! UILabel
+		let descriptionLabel = cell.viewWithTag(1002) as! UILabel
 		
-		cell.textLabel!.text = searchResults[indexPath.row]
+		imageView.image = UIImage(named: "NOICON")
+		nameLabel.text = searchResults[indexPath.row]
+		descriptionLabel.text = "This will be the animal description"
 		return cell
 		
 	}
