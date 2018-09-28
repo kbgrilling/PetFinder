@@ -13,9 +13,10 @@ class PetSearchViewController: UIViewController {
 	@IBOutlet weak var searchBar: UISearchBar!
 	@IBOutlet weak var tableview: UITableView!
 	
+	var didSearch = false
 	var searchResults = [String]()
 	
-//1352
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
@@ -28,7 +29,7 @@ class PetSearchViewController: UIViewController {
 
 extension PetSearchViewController: UISearchBarDelegate {
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-		
+		didSearch = true
 		searchResults = []
 		for _ in 0...2 {
 			searchResults.append("\(searchBar.text!) Name")
@@ -47,21 +48,49 @@ extension PetSearchViewController: UISearchBarDelegate {
 
 extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return searchResults.count
+		if !didSearch {
+			return 1
+		} else {
+			return searchResults.count
+		}
+		
 	}
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		
 		
 		let cell = tableView.dequeueReusableCell(withIdentifier: "searchResultCell", for: indexPath)
 		let imageView = cell.viewWithTag(1000) as! UIImageView
 		let nameLabel = cell.viewWithTag(1001) as! UILabel
 		let descriptionLabel = cell.viewWithTag(1002) as! UILabel
 		
-		imageView.image = UIImage(named: "NOICON")
-		nameLabel.text = searchResults[indexPath.row]
-		descriptionLabel.text = "This will be the animal description"
+		if !didSearch {
+			//imageView.image = UIImage(named: "NOICON")
+			nameLabel.text = " "
+			descriptionLabel.text = "Use the search bar above to find your new friend!"
+			cell.accessoryType = .none
+			
+		} else {
+			cell.accessoryType = .detailButton
+			imageView.image = UIImage(named: "NOICON")
+			nameLabel.text = searchResults[indexPath.row]
+			descriptionLabel.text = "This will be the animal description"
+		}
+		
+		
 		return cell
+		
+	}
+	
+	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+		tableView.deselectRow(at: indexPath, animated: true)
+	}
+	
+	func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+		if searchResults.count == 0 {
+			return nil
+		} else {
+			return indexPath
+		}
 		
 	}
 	
