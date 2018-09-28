@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0E3023B9215E205400E309D6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E3023B8215E205400E309D6 /* AppDelegate.swift */; };
-		0E3023BB215E205400E309D6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E3023BA215E205400E309D6 /* ViewController.swift */; };
+		0E3023BB215E205400E309D6 /* PetSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E3023BA215E205400E309D6 /* PetSearchViewController.swift */; };
 		0E3023BE215E205400E309D6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E3023BC215E205400E309D6 /* Main.storyboard */; };
 		0E3023C1215E205400E309D6 /* PetFinder.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0E3023BF215E205400E309D6 /* PetFinder.xcdatamodeld */; };
 		0E3023C3215E205500E309D6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0E3023C2215E205500E309D6 /* Assets.xcassets */; };
@@ -18,7 +18,7 @@
 /* Begin PBXFileReference section */
 		0E3023B5215E205400E309D6 /* PetFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PetFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0E3023B8215E205400E309D6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0E3023BA215E205400E309D6 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		0E3023BA215E205400E309D6 /* PetSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetSearchViewController.swift; sourceTree = "<group>"; };
 		0E3023BD215E205400E309D6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0E3023C0215E205400E309D6 /* PetFinder.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PetFinder.xcdatamodel; sourceTree = "<group>"; };
 		0E3023C2215E205500E309D6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -57,7 +57,7 @@
 			isa = PBXGroup;
 			children = (
 				0E3023B8215E205400E309D6 /* AppDelegate.swift */,
-				0E3023BA215E205400E309D6 /* ViewController.swift */,
+				0E3023BA215E205400E309D6 /* PetSearchViewController.swift */,
 				0E3023BC215E205400E309D6 /* Main.storyboard */,
 				0E3023C2215E205500E309D6 /* Assets.xcassets */,
 				0E3023C4215E205500E309D6 /* LaunchScreen.storyboard */,
@@ -139,7 +139,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0E3023C1215E205400E309D6 /* PetFinder.xcdatamodeld in Sources */,
-				0E3023BB215E205400E309D6 /* ViewController.swift in Sources */,
+				0E3023BB215E205400E309D6 /* PetSearchViewController.swift in Sources */,
 				0E3023B9215E205400E309D6 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
