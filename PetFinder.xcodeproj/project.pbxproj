@@ -12,7 +12,7 @@
 		0E3023BE215E205400E309D6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E3023BC215E205400E309D6 /* Main.storyboard */; };
 		0E3023C3215E205500E309D6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0E3023C2215E205500E309D6 /* Assets.xcassets */; };
 		0E3023C6215E205500E309D6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E3023C4215E205500E309D6 /* LaunchScreen.storyboard */; };
-		0E3023CE215E533600E309D6 /* Pet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E3023CD215E533600E309D6 /* Pet.swift */; };
+		0E3023D2215E802800E309D6 /* Pet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E3023D1215E802800E309D6 /* Pet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,7 +23,7 @@
 		0E3023C2215E205500E309D6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0E3023C5215E205500E309D6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0E3023C7215E205500E309D6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0E3023CD215E533600E309D6 /* Pet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pet.swift; sourceTree = "<group>"; };
+		0E3023D1215E802800E309D6 /* Pet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +62,7 @@
 				0E3023C2215E205500E309D6 /* Assets.xcassets */,
 				0E3023C4215E205500E309D6 /* LaunchScreen.storyboard */,
 				0E3023C7215E205500E309D6 /* Info.plist */,
-				0E3023CD215E533600E309D6 /* Pet.swift */,
+				0E3023D1215E802800E309D6 /* Pet.swift */,
 			);
 			path = PetFinder;
 			sourceTree = "<group>";
@@ -138,7 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0E3023CE215E533600E309D6 /* Pet.swift in Sources */,
+				0E3023D2215E802800E309D6 /* Pet.swift in Sources */,
 				0E3023BB215E205400E309D6 /* PetSearchViewController.swift in Sources */,
 				0E3023B9215E205400E309D6 /* AppDelegate.swift in Sources */,
 			);

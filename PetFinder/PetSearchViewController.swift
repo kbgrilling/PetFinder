@@ -17,7 +17,7 @@ class PetSearchViewController: UIViewController {
 	
 	
 	var didSearch = false
-	var searchResults = [String]()
+	var searchResults = [Pet]()
 	
 
 	override func viewDidLoad() {
@@ -26,10 +26,7 @@ class PetSearchViewController: UIViewController {
 		//lowers the table view below the search bar so the first cell is seen
 		tableview.contentInset = UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0	)
 		//performs initial search will remove when other types are searchable
-		if let jsonString = performPetSearchRequest(with: petFinderURL(searchText: "rabbit")) {
-			print("Received Animals \(jsonString)")
-		}
-			
+		
 		
 	}
 	
@@ -43,15 +40,87 @@ class PetSearchViewController: UIViewController {
 		return url!
 	}
 	
-	func performPetSearchRequest(with url: URL) -> String? {
+	func performPetSearchRequest(with url: URL) -> [String: Any]? {
 		do {
-			return try String(contentsOf: url, encoding: .utf8)
-		} catch {
-			print("Download Error: \(error.localizedDescription)")
-			return nil
+			let data = try Data(contentsOf: url)
+			do {
+				let object = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
+				
+				return object
+			} catch {
+				print("something went wrong \(error.localizedDescription)")
+			}
+		} catch let error as NSError {
+			print("error: \(error.localizedDescription)")
 		}
+		return nil
 	}
+	/*
+	func parse(data: Data) -> [Pet] {
+		do {
+			let decoder = JSONDecoder()
+			let result = try decoder.decode(PetsResultArray.self, from: data)
+			return result.petFinder
+		} catch {
+			print("JSON error: \(error)")
+			return []
+		}
+	}*/
+	func parse(dictionary: [String: Any]) -> [Pet] {
+		//breaks down the first dictionary petfinder
+		print("here is the dictionary: \(dictionary)")
 
+		guard let resultArray = dictionary["petfinder"] as? [String: Any] else {
+			print("Expected 'result array'")
+			return []
+		}
+			//breaks down the group of pets to inidvidual pets
+		guard let resultPetsArray = resultArray["pets"] as? [String: AnyObject] else {
+			print("Expected 'pet array'")
+			return []
+		}
+		// returned array of Pet objects
+		var returnedPets = [Pet]()
+		//gets the total number of pets returned.  25 is the max from the petFinder api
+		var petCount = resultPetsArray["pet"]!.count as Int
+		// decrease petcount for looping
+		petCount -= 1
+		
+		
+		let a = resultPetsArray["pet"]! as! Array<[String: AnyObject]>
+		
+		for i in 0...petCount {
+			let newPet = Pet()
+			//goes through pet object until it finds the name
+			if let thisAnimalName = a[i]["name"]!["$t"]! {
+				//print(thisAnimalName)
+				newPet.name = thisAnimalName as? String
+			} else {
+				newPet.name = "No Name"
+			}
+			//goes through pet object until it finds the name
+			if let thisAnimalDescription = a[i]["description"]!["$t"]! {
+				//print(thisAnimalDescription)
+				newPet.description = thisAnimalDescription as? String
+			} else {
+				newPet.description = "No Description"
+			}
+			let v = a[i]["media"]!["photos"]! as! [String: [AnyObject]]
+			for p in 0...2 {
+				let thisAnimalPicture = v["photo"]![p] as! [String: String]
+				//print(thisAnimalPicture["$t"]!)
+				if p == 0 {
+					newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
+				} else if p == 2 {
+					newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
+				}
+			}
+			returnedPets.append(newPet)
+		}
+			print(returnedPets)
+			self.searchResults = returnedPets
+			return returnedPets
+	}
 
 }
 
@@ -59,19 +128,16 @@ extension PetSearchViewController: UISearchBarDelegate {
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 		didSearch = true
 		searchBar.resignFirstResponder()
-		searchResults = []
-		for _ in 0...2 {
-			searchResults.append("\(searchBar.text!) Name")
+
+		let url = petFinderURL(searchText: "rabbit")
+		print("URL: \(url)")
+		if let data = performPetSearchRequest(with: url) {
+			let results = self.parse(dictionary: data)
+				print("got dictionary \(results)")
 			
+			}
+			tableview.reloadData()
 		}
-		
-		
-		
-		tableview.reloadData()
-		
-	}
-	
-	
 	
 	func position(for bar: UIBarPositioning) -> UIBarPosition {
 		return .topAttached
@@ -104,8 +170,8 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 		} else {
 			cell.accessoryType = .detailButton
 			imageView.image = UIImage(named: "NOICON")
-			nameLabel.text = searchResults[indexPath.row]
-			descriptionLabel.text = "This will be the animal description"
+			nameLabel.text = searchResults[indexPath.row].name!
+			descriptionLabel.text = searchResults[indexPath.row].description!
 		}
 		
 		
