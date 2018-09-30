@@ -16,7 +16,7 @@ class PetSearchViewController: UIViewController {
 	
 	var didSearch = false
 	var isLoading = false
-	var searchResults = [Pet]()
+	var returnedPets = [Pet]()
 	
 
 	override func viewDidLoad() {
@@ -67,8 +67,7 @@ class PetSearchViewController: UIViewController {
 	}*/
 	func parse(dictionary: [String: Any]) -> [Pet] {
 		//breaks down the first dictionary petfinder
-		print("here is the dictionary: \(dictionary)")
-
+		
 		guard let resultArray = dictionary["petfinder"] as? [String: Any] else {
 			print("Expected 'result array'")
 			return []
@@ -78,8 +77,7 @@ class PetSearchViewController: UIViewController {
 			print("Expected 'pet array'")
 			return []
 		}
-		// returned array of Pet objects
-		var returnedPets = [Pet]()
+		
 		//gets the total number of pets returned.  25 is the max from the petFinder api
 		var petCount = resultPetsArray["pet"]!.count as Int
 		// decrease petcount for looping
@@ -114,31 +112,41 @@ class PetSearchViewController: UIViewController {
 					newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
 				}
 			}
-			returnedPets.append(newPet)
+			self.returnedPets.append(newPet)
 		}
-			print(returnedPets)
-			self.searchResults = returnedPets
-			return returnedPets
+		
+		
+			return self.returnedPets
 	}
 
 }
 
 extension PetSearchViewController: UISearchBarDelegate {
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-		didSearch = true
-		searchBar.resignFirstResponder()
-		isLoading = true
-		tableview.reloadData()
-		
-		let url = petFinderURL(searchText: "rabbit")
-		print("URL: \(url)")
-		if let data = performPetSearchRequest(with: url) {
-			let results = self.parse(dictionary: data)
-				print("got dictionary \(results)")
-			
-			}
+		if !searchBar.text!.isEmpty {
+			didSearch = true
+			//add searchText to quite warning of searchbar is only availabe on main thread.
+			let searchText = searchBar.text!
+			searchBar.resignFirstResponder()
+			isLoading = true
 			tableview.reloadData()
+			
+			returnedPets = []
+			let queue = DispatchQueue.global()
+			queue.async {
+				let url = self.petFinderURL(searchText: searchText)
+				
+				if let data = self.performPetSearchRequest(with: url) {
+					self.returnedPets = self.parse(dictionary: data)
+					DispatchQueue.main.async {
+						self.isLoading = false
+						self.tableview.reloadData()
+					}
+					return
+				}
+			}
 		}
+	}
 	
 	func position(for bar: UIBarPositioning) -> UIBarPosition {
 		return .topAttached
@@ -150,7 +158,7 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 		if !didSearch || isLoading {
 			return 1
 		} else {
-			return searchResults.count
+			return returnedPets.count
 		}
 		
 	}
@@ -181,8 +189,8 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 				cell.accessoryType = .detailButton
 			
 				imageView.image = UIImage(named: "NOICON")
-				nameLabel.text = searchResults[indexPath.row].name!
-				descriptionLabel.text = searchResults[indexPath.row].description!
+				nameLabel.text = returnedPets[indexPath.row].name!
+				descriptionLabel.text = returnedPets[indexPath.row].description!
 			}
 			return cell
 		}
@@ -194,7 +202,7 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 	}
 	
 	func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-		if searchResults.count == 0 || isLoading {
+		if returnedPets.count == 0 || isLoading {
 			return nil
 		} else {
 			return indexPath
