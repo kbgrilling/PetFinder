@@ -14,9 +14,8 @@ class PetSearchViewController: UIViewController {
 	@IBOutlet weak var tableview: UITableView!
 	
 	
-	
-	
 	var didSearch = false
+	var isLoading = false
 	var searchResults = [Pet]()
 	
 
@@ -128,7 +127,9 @@ extension PetSearchViewController: UISearchBarDelegate {
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 		didSearch = true
 		searchBar.resignFirstResponder()
-
+		isLoading = true
+		tableview.reloadData()
+		
 		let url = petFinderURL(searchText: "rabbit")
 		print("URL: \(url)")
 		if let data = performPetSearchRequest(with: url) {
@@ -146,7 +147,7 @@ extension PetSearchViewController: UISearchBarDelegate {
 
 extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		if !didSearch {
+		if !didSearch || isLoading {
 			return 1
 		} else {
 			return searchResults.count
@@ -156,26 +157,35 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		
-		let cell = tableView.dequeueReusableCell(withIdentifier: "searchResultCell", for: indexPath)
-		let imageView = cell.viewWithTag(1000) as! UIImageView
-		let nameLabel = cell.viewWithTag(1001) as! UILabel
-		let descriptionLabel = cell.viewWithTag(1002) as! UILabel
-		
-		if !didSearch {
-			//imageView.image = UIImage(named: "NOICON")
-			nameLabel.text = " "
-			descriptionLabel.text = "Use the search bar above to find your new friend!"
-			cell.accessoryType = .none
+		if isLoading {
+			let cell = tableView.dequeueReusableCell(withIdentifier: "loadingCell", for: indexPath)
 			
+			let spinner = cell.viewWithTag(100) as! UIActivityIndicatorView
+			spinner.startAnimating()
+			return cell
 		} else {
-			cell.accessoryType = .detailButton
-			imageView.image = UIImage(named: "NOICON")
-			nameLabel.text = searchResults[indexPath.row].name!
-			descriptionLabel.text = searchResults[indexPath.row].description!
+		
+			let cell = tableView.dequeueReusableCell(withIdentifier: "searchResultCell", for: indexPath)
+			let imageView = cell.viewWithTag(1000) as! UIImageView
+			let nameLabel = cell.viewWithTag(1001) as! UILabel
+			let descriptionLabel = cell.viewWithTag(1002) as! UILabel
+			
+			if !didSearch {
+				//imageView.image = UIImage(named: "NOICON")
+				nameLabel.text = " "
+				descriptionLabel.text = "Use the search bar above to find your new friend!"
+				cell.accessoryType = .none
+				
+			} else {
+			
+				cell.accessoryType = .detailButton
+			
+				imageView.image = UIImage(named: "NOICON")
+				nameLabel.text = searchResults[indexPath.row].name!
+				descriptionLabel.text = searchResults[indexPath.row].description!
+			}
+			return cell
 		}
-		
-		
-		return cell
 		
 	}
 	
@@ -184,7 +194,7 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 	}
 	
 	func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-		if searchResults.count == 0 {
+		if searchResults.count == 0 || isLoading {
 			return nil
 		} else {
 			return indexPath
