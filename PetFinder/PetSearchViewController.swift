@@ -17,7 +17,7 @@ class PetSearchViewController: UIViewController {
 	var didSearch = false
 	var isLoading = false
 	var returnedPets = [Pet]()
-	
+	var imageDownloadTask: URLSessionDownloadTask?
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -25,7 +25,18 @@ class PetSearchViewController: UIViewController {
 		//lowers the table view below the search bar so the first cell is seen
 		tableview.contentInset = UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0	)
 		//performs initial search will remove when other types are searchable
+
+	}
+	
+	override func viewDidAppear(_ animated: Bool) {
 		
+	}
+	
+	func showNetworkError() {
+		let alert = UIAlertController(title: "There seems to be an accident", message: "There was an error accessing the Pet Finder site. Please try again.", preferredStyle: .alert)
+		let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+		alert.addAction(action)
+		present(alert, animated: true, completion: nil)
 		
 	}
 	
@@ -39,36 +50,56 @@ class PetSearchViewController: UIViewController {
 		return url!
 	}
 	
-	func performPetSearchRequest(with url: URL) -> [String: Any]? {
-		do {
-			let data = try Data(contentsOf: url)
-			do {
-				let object = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
-				
-				return object
-			} catch {
-				print("something went wrong \(error.localizedDescription)")
-			}
-		} catch let error as NSError {
-			print("error: \(error.localizedDescription)")
-		}
-		return nil
-	}
-	/*
-	func parse(data: Data) -> [Pet] {
-		do {
-			let decoder = JSONDecoder()
-			let result = try decoder.decode(PetsResultArray.self, from: data)
-			return result.petFinder
-		} catch {
-			print("JSON error: \(error)")
-			return []
-		}
-	}*/
-	func parse(dictionary: [String: Any]) -> [Pet] {
-		//breaks down the first dictionary petfinder
+	func performPetSearch(searchText: String) {
+		print("initial called")
 		
-		guard let resultArray = dictionary["petfinder"] as? [String: Any] else {
+			didSearch = true
+			//add searchText to quite warning of searchbar is only availabe on main thread.
+			//let searchText = searchBar.text!
+			searchBar.resignFirstResponder()
+			isLoading = true
+			tableview.reloadData()
+			
+			returnedPets = []
+			let url = petFinderURL(searchText: searchBar.text!)
+			
+			let session = URLSession.shared
+			
+			let dataTask = session.dataTask(with: url,
+											completionHandler: { data, response, error in
+												if let error  = error {
+													print("Failure: \(error)")
+												} else if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+													if let data = data {
+														self.returnedPets = self.parse(dictionary: data)
+														DispatchQueue.main.async {
+															self.isLoading = false
+															self.tableview.reloadData()
+														}
+														return
+													}
+												} else {
+													print("Failure! \(response!)")
+												}
+												DispatchQueue.main.async {
+													self.didSearch = false
+													self.isLoading = false
+													self.tableview.reloadData()
+													self.showNetworkError()
+												}
+			})
+			dataTask.resume()
+		
+	}
+
+	
+	
+	func parse(dictionary: Data) -> [Pet] {
+		//breaks down the first dictionary petfinder
+		do {
+			let json = try JSONSerialization.jsonObject(with: dictionary, options: []) as! [String: Any]
+		
+			guard let resultArray = json["petfinder"] as? [String: Any] else {
 			print("Expected 'result array'")
 			return []
 		}
@@ -114,9 +145,11 @@ class PetSearchViewController: UIViewController {
 			}
 			self.returnedPets.append(newPet)
 		}
-		
-		
-			return self.returnedPets
+			
+		} catch {
+			print("something went wrong \(error.localizedDescription)")
+		}
+		return returnedPets
 	}
 
 }
@@ -124,27 +157,7 @@ class PetSearchViewController: UIViewController {
 extension PetSearchViewController: UISearchBarDelegate {
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 		if !searchBar.text!.isEmpty {
-			didSearch = true
-			//add searchText to quite warning of searchbar is only availabe on main thread.
-			let searchText = searchBar.text!
-			searchBar.resignFirstResponder()
-			isLoading = true
-			tableview.reloadData()
-			
-			returnedPets = []
-			let queue = DispatchQueue.global()
-			queue.async {
-				let url = self.petFinderURL(searchText: searchText)
-				
-				if let data = self.performPetSearchRequest(with: url) {
-					self.returnedPets = self.parse(dictionary: data)
-					DispatchQueue.main.async {
-						self.isLoading = false
-						self.tableview.reloadData()
-					}
-					return
-				}
-			}
+				performPetSearch(searchText: searchBar.text!)
 		}
 	}
 	
@@ -154,6 +167,7 @@ extension PetSearchViewController: UISearchBarDelegate {
 }
 
 extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
+	
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		if !didSearch || isLoading {
 			return 1
@@ -183,11 +197,13 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 				nameLabel.text = " "
 				descriptionLabel.text = "Use the search bar above to find your new friend!"
 				cell.accessoryType = .none
-				
+				performPetSearch(searchText: "rabbit")
 			} else {
 			
 				cell.accessoryType = .detailButton
-			
+				if let thumbnailURL = URL(string: returnedPets[indexPath.row].thumbnailImageURL!) {
+					imageDownloadTask = imageView.loadImage(url: thumbnailURL)
+				}
 				imageView.image = UIImage(named: "NOICON")
 				nameLabel.text = returnedPets[indexPath.row].name!
 				descriptionLabel.text = returnedPets[indexPath.row].description!
@@ -209,6 +225,7 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 		}
 		
 	}
+	
 	
 	
 }
