@@ -133,14 +133,18 @@ class PetSearchViewController: UIViewController {
 			} else {
 				newPet.description = "No Description"
 			}
-			let v = a[i]["media"]!["photos"]! as! [String: [AnyObject]]
-			for p in 0...2 {
-				let thisAnimalPicture = v["photo"]![p] as! [String: String]
-				//print(thisAnimalPicture["$t"]!)
-				if p == 0 {
-					newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
-				} else if p == 2 {
-					newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
+			print("loop count \(i)")
+			if let v = a[i]["media"]!["photos"]! as? [String: [AnyObject]] {
+				
+				for p in 0...2 {
+					print("here is p \(p)")
+					let thisAnimalPicture = v["photo"]![p] as! [String: String]
+					//print(thisAnimalPicture["$t"]!)
+					if p == 0 {
+						newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
+					} else if p == 2 {
+						newPet.imageURL = thisAnimalPicture["$t"]!
+					}
 				}
 			}
 			self.returnedPets.append(newPet)
@@ -201,12 +205,25 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 			} else {
 			
 				cell.accessoryType = .detailButton
-				if let thumbnailURL = URL(string: returnedPets[indexPath.row].thumbnailImageURL!) {
-					imageDownloadTask = imageView.loadImage(url: thumbnailURL)
+				
+				if let thumbnailURL = returnedPets[indexPath.row].thumbnailImageURL {
+					let imageURL = URL(string: thumbnailURL)
+					imageDownloadTask = imageView.loadImage(url: imageURL!)
+					
+				} else {
+					imageView.image = UIImage(named: "NOICON")
 				}
-				imageView.image = UIImage(named: "NOICON")
-				nameLabel.text = returnedPets[indexPath.row].name!
-				descriptionLabel.text = returnedPets[indexPath.row].description!
+				if let currentAnimalName = returnedPets[indexPath.row].name {
+					nameLabel.text = currentAnimalName
+				} else {
+					nameLabel.text = "un-named"
+				}
+				if let currentAnimalDescription = returnedPets[indexPath.row].description {
+					descriptionLabel.text = currentAnimalDescription
+				} else {
+					descriptionLabel.text = "Description coming soon..."
+				}
+				
 			}
 			return cell
 		}
