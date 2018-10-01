@@ -14,6 +14,7 @@
 		0E3023C6215E205500E309D6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E3023C4215E205500E309D6 /* LaunchScreen.storyboard */; };
 		0E3023D2215E802800E309D6 /* Pet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E3023D1215E802800E309D6 /* Pet.swift */; };
 		0E87F038216273D100EE0F0A /* UIImageViewDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E87F037216273D100EE0F0A /* UIImageViewDownloadImage.swift */; };
+		0E87F03A2162896700EE0F0A /* PetDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E87F0392162896700EE0F0A /* PetDetailsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		0E3023C7215E205500E309D6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0E3023D1215E802800E309D6 /* Pet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pet.swift; sourceTree = "<group>"; };
 		0E87F037216273D100EE0F0A /* UIImageViewDownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageViewDownloadImage.swift; sourceTree = "<group>"; };
+		0E87F0392162896700EE0F0A /* PetDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDetailsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,7 +44,6 @@
 		0E3023AC215E205400E309D6 = {
 			isa = PBXGroup;
 			children = (
-				0E87F037216273D100EE0F0A /* UIImageViewDownloadImage.swift */,
 				0E3023B7215E205400E309D6 /* PetFinder */,
 				0E3023B6215E205400E309D6 /* Products */,
 			);
@@ -59,9 +60,11 @@
 		0E3023B7215E205400E309D6 /* PetFinder */ = {
 			isa = PBXGroup;
 			children = (
+				0E87F037216273D100EE0F0A /* UIImageViewDownloadImage.swift */,
 				0E3023B8215E205400E309D6 /* AppDelegate.swift */,
 				0E3023BA215E205400E309D6 /* PetSearchViewController.swift */,
 				0E3023BC215E205400E309D6 /* Main.storyboard */,
+				0E87F0392162896700EE0F0A /* PetDetailsViewController.swift */,
 				0E3023C2215E205500E309D6 /* Assets.xcassets */,
 				0E3023C4215E205500E309D6 /* LaunchScreen.storyboard */,
 				0E3023C7215E205500E309D6 /* Info.plist */,
@@ -141,6 +144,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E87F03A2162896700EE0F0A /* PetDetailsViewController.swift in Sources */,
 				0E87F038216273D100EE0F0A /* UIImageViewDownloadImage.swift in Sources */,
 				0E3023D2215E802800E309D6 /* Pet.swift in Sources */,
 				0E3023BB215E205400E309D6 /* PetSearchViewController.swift in Sources */,

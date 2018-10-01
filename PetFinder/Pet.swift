@@ -15,10 +15,23 @@ class PetsResultArray: Codable, CustomStringConvertible {
 }
 
 class Pet: Codable {
+	var id: String?
 	var name: String?
 	var description: String?
 	var thumbnailImageURL: String?
 	var imageURL: String?
+	var phoneNumber: String?
+	var address1: String?
+	var address2: String?
+	var city: String?
+	var state: String?
+	var zip: String?
+	var email: String?
+	var age: String?
+	var size: String?
+	var gender: String?
+	var breed: [String] = []
+	
 }
 
 

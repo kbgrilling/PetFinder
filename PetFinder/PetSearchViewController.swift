@@ -128,18 +128,67 @@ class PetSearchViewController: UIViewController {
 			}
 			//goes through pet object until it finds the name
 			if let thisAnimalDescription = a[i]["description"]!["$t"]! {
-				//print(thisAnimalDescription)
 				newPet.description = thisAnimalDescription as? String
 			} else {
-				newPet.description = "No Description"
+				newPet.description = "No Description."
 			}
-			print("loop count \(i)")
+			
+			if let thisAnimalAge = a[i]["age"]!["$t"]! {
+				newPet.age = thisAnimalAge as? String
+			} else {
+				newPet.age = "Age is unknown."
+			}
+			
+			if let thisAnimalSize = a[i]["age"]!["$t"]! {
+				newPet.size = thisAnimalSize as? String
+			} else {
+				newPet.size = "Size is unknown."
+			}
+			
+			if let thisAnimalID = a[i]["id"]!["$t"]! {
+				newPet.id = thisAnimalID as? String
+			} else {
+				newPet.id = "ID is unknown."
+			}
+			
+			if let thisAnimalGender = a[i]["sex"]!["$t"]! {
+				newPet.gender = thisAnimalGender as? String
+			} else {
+				newPet.gender = "ID is unknown."
+			}
+			
+			//get contact information
+			if let contactInfo = a[i]["contact"]! as? [String: AnyObject] {
+				newPet.address1 = contactInfo["address1"]!["$t"]! as? String
+				newPet.city = contactInfo["city"]!["$t"]! as? String
+				newPet.state = contactInfo["state"]!["$t"]! as? String
+				newPet.zip = contactInfo["zip"]!["$t"]! as? String
+				newPet.email = contactInfo["email"]!["$t"]! as? String
+				newPet.phoneNumber = contactInfo["phone"]!["$t"]! as? String
+			}
+			
+			//get breed
+			if let petBreed = a[i]["breeds"]! as? [String: AnyObject] {
+				if let newPetBreed = petBreed["breed"]!["$t"] as? String {
+					newPet.breed.append(newPetBreed)
+				} /*else if let newPetBreed = petBreed["breed"]![] as? [String: [AnyObject]]  {
+					for b in newPetBreed {
+						let newPetBreedArray = [String(b)]["$t"]! as! String
+					}*/
+				} else if let petBreed = a[i]["breeds"]! as? [String: [AnyObject]] {
+					for b in 0...2 {
+						let newPetBreedArray = petBreed["breed"]![b] as! [String: String]
+						let newPetBreed = newPetBreedArray["$t"]!
+						newPet.breed.append(newPetBreed)
+					}
+				
+			}
+			
+			//get picture urls
 			if let v = a[i]["media"]!["photos"]! as? [String: [AnyObject]] {
 				
 				for p in 0...2 {
-					print("here is p \(p)")
 					let thisAnimalPicture = v["photo"]![p] as! [String: String]
-					//print(thisAnimalPicture["$t"]!)
 					if p == 0 {
 						newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
 					} else if p == 2 {
@@ -147,6 +196,7 @@ class PetSearchViewController: UIViewController {
 					}
 				}
 			}
+			print("here is the newPet \(newPet.breed)")
 			self.returnedPets.append(newPet)
 		}
 			
@@ -154,6 +204,13 @@ class PetSearchViewController: UIViewController {
 			print("something went wrong \(error.localizedDescription)")
 		}
 		return returnedPets
+	}
+	
+	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+		if segue.identifier == "petDetails" {
+			let pdVC = segue.destination as! PetDetailsViewContoller
+				pdVC.thisPet = sender as! Pet
+		}
 	}
 
 }
@@ -232,6 +289,8 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 	
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		tableView.deselectRow(at: indexPath, animated: true)
+		let pet = returnedPets[indexPath.row]
+		performSegue(withIdentifier: "petDetails", sender: pet)
 	}
 	
 	func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
