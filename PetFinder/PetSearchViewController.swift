@@ -171,11 +171,8 @@ class PetSearchViewController: UIViewController {
 			if let petBreed = a[i]["breeds"]! as? [String: AnyObject] {
 				if let newPetBreed = petBreed["breed"]!["$t"] as? String {
 					newPet.breed.append(newPetBreed)
-				} /*else if let newPetBreed = petBreed["breed"]![] as? [String: [AnyObject]]  {
-					for b in newPetBreed {
-						let newPetBreedArray = [String(b)]["$t"]! as! String
-					}*/
-				} else if let petBreed = a[i]["breeds"]! as? [String: [AnyObject]] {
+				}
+			} else if let petBreed = a[i]["breeds"]! as? [String: [AnyObject]] {
 					for b in 0...2 {
 						let newPetBreedArray = petBreed["breed"]![b] as! [String: String]
 						let newPetBreed = newPetBreedArray["$t"]!
@@ -196,7 +193,6 @@ class PetSearchViewController: UIViewController {
 					}
 				}
 			}
-			print("here is the newPet \(newPet.breed)")
 			self.returnedPets.append(newPet)
 		}
 			
