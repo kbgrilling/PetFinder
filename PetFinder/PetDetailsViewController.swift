@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MapKit
 
 class PetDetailsViewContoller: UIViewController {
 	
@@ -48,8 +49,6 @@ class PetDetailsViewContoller: UIViewController {
 		} else {
 			PetBreedLabel.text! += " Unknown"
 		}
-		PetBreedLabel.sizeToFit()
-		PetDescriptionLabel.sizeToFit()
 		
 		if let petEmail = thisPet.email {
 			ShelterEmailLabel.text = petEmail
