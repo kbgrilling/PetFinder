@@ -41,7 +41,8 @@ class PetSearchViewController: UIViewController {
 	}
 	
 	func petFinderURL(searchText: String) -> URL {
-		let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
+		let lowerCaseSearchText = searchText.lowercased()
+		let encodedText = lowerCaseSearchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
 		
 		let urlString = String(format: "https://api.petfinder.com/pet.find?key=d62ea251b3e02d378ee3dcfbb39b37db&animal=%@&location=Raleigh,NC&format=json", encodedText)
 		
