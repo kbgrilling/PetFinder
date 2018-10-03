@@ -9,7 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Pet Search View Controller-->
+        <!--Search For Your New Friend-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="PetSearchViewController" customModule="PetFinder" customModuleProvider="target" sceneMemberID="viewController">
@@ -104,7 +104,7 @@
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="znQ-VW-ZAH"/>
                                 </connections>
                             </tableView>
-                            <searchBar contentMode="redraw" text="rabbit" placeholder="Search for your new pet" translatesAutoresizingMaskIntoConstraints="NO" id="Vnm-Z1-Hc3">
+                            <searchBar contentMode="redraw" translatesAutoresizingMaskIntoConstraints="NO" id="Vnm-Z1-Hc3">
                                 <rect key="frame" x="0.0" y="64" width="320" height="56"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no"/>
                                 <connections>
@@ -124,7 +124,9 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
-                    <navigationItem key="navigationItem" id="zcr-Ri-aeG"/>
+                    <navigationItem key="navigationItem" title="Search For Your New Friend" id="zcr-Ri-aeG">
+                        <barButtonItem key="backBarButtonItem" title="Back" id="0kX-Ab-fWf"/>
+                    </navigationItem>
                     <connections>
                         <outlet property="searchBar" destination="Vnm-Z1-Hc3" id="SpC-4T-LBz"/>
                         <outlet property="tableview" destination="uAZ-Qn-JZg" id="Q6F-KM-k7P"/>

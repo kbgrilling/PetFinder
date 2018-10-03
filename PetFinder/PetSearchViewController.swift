@@ -13,23 +13,26 @@ class PetSearchViewController: UIViewController {
 	@IBOutlet weak var searchBar: UISearchBar!
 	@IBOutlet weak var tableview: UITableView!
 	
-	
+	//create search bar titles
+	let scopeButtonTitles = ["Rabbit", "Dog", "Cat", "Bird", "Reptile", "Horse"]
+	//not needed because of the rabbit search will keep for future development
 	var didSearch = false
+	//for activity indicator
 	var isLoading = false
+	//returned value from search
 	var returnedPets = [Pet]()
 	var imageDownloadTask: URLSessionDownloadTask?
-
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
 		//lowers the table view below the search bar so the first cell is seen
-		tableview.contentInset = UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0	)
-		//performs initial search will remove when other types are searchable
-
-	}
-	
-	override func viewDidAppear(_ animated: Bool) {
-		
+		tableview.contentInset = UIEdgeInsets(top: 94, left: 0, bottom: 0, right: 0	)
+		searchBar.scopeButtonTitles = scopeButtonTitles
+		searchBar.showsScopeBar = true
+		//searchBar.placeholder = "Use the category tabs below"
+		navigationController?.title = "Search for your new friend!"
+		performPetSearch(searchText: "rabbit")
 	}
 	
 	func showNetworkError() {
@@ -52,150 +55,170 @@ class PetSearchViewController: UIViewController {
 	}
 	
 	func performPetSearch(searchText: String) {
-		print("initial called")
 		
-			didSearch = true
-			//add searchText to quite warning of searchbar is only availabe on main thread.
-			//let searchText = searchBar.text!
-			searchBar.resignFirstResponder()
-			isLoading = true
-			tableview.reloadData()
-			
-			returnedPets = []
-			let url = petFinderURL(searchText: searchBar.text!)
-			
-			let session = URLSession.shared
-			
-			let dataTask = session.dataTask(with: url,
-											completionHandler: { data, response, error in
-												if let error  = error {
-													print("Failure: \(error)")
-												} else if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-													if let data = data {
-														self.returnedPets = self.parse(dictionary: data)
-														DispatchQueue.main.async {
-															self.isLoading = false
-															self.tableview.reloadData()
-														}
-														return
+		didSearch = true
+		//add searchText to quite warning of searchbar is only availabe on main thread.
+		//let searchText = searchBar.text!
+		searchBar.resignFirstResponder()
+		isLoading = true
+		tableview.reloadData()
+		
+		returnedPets = []
+		let url = petFinderURL(searchText: searchText)
+		
+		let session = URLSession.shared
+		
+		let dataTask = session.dataTask(with: url,
+										completionHandler: { data, response, error in
+											if let error  = error {
+												print("Failure: \(error)")
+											} else if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+												if let data = data {
+													self.returnedPets = self.parse(dictionary: data)
+													DispatchQueue.main.async {
+														self.isLoading = false
+														self.tableview.reloadData()
 													}
-												} else {
-													print("Failure! \(response!)")
+													return
 												}
-												DispatchQueue.main.async {
-													self.didSearch = false
-													self.isLoading = false
-													self.tableview.reloadData()
-													self.showNetworkError()
-												}
-			})
-			dataTask.resume()
+											} else {
+												print("Failure! \(response!)")
+											}
+											DispatchQueue.main.async {
+												self.didSearch = false
+												self.isLoading = false
+												self.tableview.reloadData()
+												self.showNetworkError()
+											}
+		})
+		dataTask.resume()
 		
 	}
-
+	
 	
 	
 	func parse(dictionary: Data) -> [Pet] {
 		//breaks down the first dictionary petfinder
 		do {
 			let json = try JSONSerialization.jsonObject(with: dictionary, options: []) as! [String: Any]
-		
+			
 			guard let resultArray = json["petfinder"] as? [String: Any] else {
-			print("Expected 'result array'")
-			return []
-		}
+				print("Expected 'result array'")
+				return []
+			}
 			//breaks down the group of pets to inidvidual pets
-		guard let resultPetsArray = resultArray["pets"] as? [String: AnyObject] else {
-			print("Expected 'pet array'")
-			return []
-		}
-		
-		//gets the total number of pets returned.  25 is the max from the petFinder api
-		var petCount = resultPetsArray["pet"]!.count as Int
-		// decrease petcount for looping
-		petCount -= 1
-		
-		
-		let a = resultPetsArray["pet"]! as! Array<[String: AnyObject]>
-		
-		for i in 0...petCount {
-			let newPet = Pet()
-			//goes through pet object until it finds the name
-			if let thisAnimalName = a[i]["name"]!["$t"]! {
-				//print(thisAnimalName)
-				newPet.name = thisAnimalName as? String
-			} else {
-				newPet.name = "No Name"
-			}
-			//goes through pet object until it finds the name
-			if let thisAnimalDescription = a[i]["description"]!["$t"]! {
-				newPet.description = thisAnimalDescription as? String
-			} else {
-				newPet.description = "No Description."
+			guard let resultPetsArray = resultArray["pets"] as? [String: AnyObject] else {
+				print("Expected 'pet array'")
+				//user entered a non-category throw alert
+				let alert = UIAlertController(title: "Sorry no matches", message: "Limit your search to the tabs below the search box. Please try again.", preferredStyle: .alert)
+				let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+				alert.addAction(action)
+				present(alert, animated: true, completion: nil)
+				return []
 			}
 			
-			if let thisAnimalAge = a[i]["age"]!["$t"]! {
-				newPet.age = thisAnimalAge as? String
+			
+			//if a user searches for an existing category and the return is 0 throw alert
+			if  resultPetsArray["pet"] == nil {
+				let alert = UIAlertController(title: "Sorry no matches", message: "Limit your search to the tabs below the search box. Please try again.", preferredStyle: .alert)
+				let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+				alert.addAction(action)
+				present(alert, animated: true, completion: nil)
+				return []
+			}
+			
+			//gets the total number of pets returned.  25 is the max from the petFinder api
+			var petCount = resultPetsArray["pet"]!.count as Int
+			// decrease petcount for looping
+			if petCount > 0 {
+				petCount -= 1
 			} else {
-				newPet.age = "Age is unknown."
+				let alert = UIAlertController(title: "Sorry no matches", message: "Limit your search to the tabs below the search box. Please try again.", preferredStyle: .alert)
+				let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+				alert.addAction(action)
+				present(alert, animated: true, completion: nil)
 			}
 			
-			if let thisAnimalSize = a[i]["age"]!["$t"]! {
-				newPet.size = thisAnimalSize as? String
-			} else {
-				newPet.size = "Size is unknown."
-			}
+			let a = resultPetsArray["pet"]! as! Array<[String: AnyObject]>
 			
-			if let thisAnimalID = a[i]["id"]!["$t"]! {
-				newPet.id = thisAnimalID as? String
-			} else {
-				newPet.id = "ID is unknown."
-			}
-			
-			if let thisAnimalGender = a[i]["sex"]!["$t"]! {
-				newPet.gender = thisAnimalGender as? String
-			} else {
-				newPet.gender = "ID is unknown."
-			}
-			
-			//get contact information
-			if let contactInfo = a[i]["contact"]! as? [String: AnyObject] {
-				newPet.address1 = contactInfo["address1"]!["$t"]! as? String
-				newPet.city = contactInfo["city"]!["$t"]! as? String
-				newPet.state = contactInfo["state"]!["$t"]! as? String
-				newPet.zip = contactInfo["zip"]!["$t"]! as? String
-				newPet.email = contactInfo["email"]!["$t"]! as? String
-				newPet.phoneNumber = contactInfo["phone"]!["$t"]! as? String
-			}
-			
-			//get breed
-			if let petBreed = a[i]["breeds"]! as? [String: AnyObject] {
-				if let newPetBreed = petBreed["breed"]!["$t"] as? String {
-					newPet.breed.append(newPetBreed)
+			for i in 0...petCount {
+				let newPet = Pet()
+				//goes through pet object until it finds the name
+				if let thisAnimalName = a[i]["name"]!["$t"]! {
+					//print(thisAnimalName)
+					newPet.name = thisAnimalName as? String
+				} else {
+					newPet.name = "No Name"
 				}
-			} else if let petBreed = a[i]["breeds"]! as? [String: [AnyObject]] {
+				//goes through pet object until it finds the name
+				if let thisAnimalDescription = a[i]["description"]!["$t"]! {
+					newPet.description = thisAnimalDescription as? String
+				} else {
+					newPet.description = "No Description."
+				}
+				
+				if let thisAnimalAge = a[i]["age"]!["$t"]! {
+					newPet.age = thisAnimalAge as? String
+				} else {
+					newPet.age = "Age is unknown."
+				}
+				
+				if let thisAnimalSize = a[i]["age"]!["$t"]! {
+					newPet.size = thisAnimalSize as? String
+				} else {
+					newPet.size = "Size is unknown."
+				}
+				
+				if let thisAnimalID = a[i]["id"]!["$t"]! {
+					newPet.id = thisAnimalID as? String
+				} else {
+					newPet.id = "ID is unknown."
+				}
+				
+				if let thisAnimalGender = a[i]["sex"]!["$t"]! {
+					newPet.gender = thisAnimalGender as? String
+				} else {
+					newPet.gender = "ID is unknown."
+				}
+				
+				//get contact information
+				if let contactInfo = a[i]["contact"]! as? [String: AnyObject] {
+					newPet.address1 = contactInfo["address1"]!["$t"]! as? String
+					newPet.city = contactInfo["city"]!["$t"]! as? String
+					newPet.state = contactInfo["state"]!["$t"]! as? String
+					newPet.zip = contactInfo["zip"]!["$t"]! as? String
+					newPet.email = contactInfo["email"]!["$t"]! as? String
+					newPet.phoneNumber = contactInfo["phone"]!["$t"]! as? String
+				}
+				
+				//get breed
+				if let petBreed = a[i]["breeds"]! as? [String: AnyObject] {
+					if let newPetBreed = petBreed["breed"]!["$t"] as? String {
+						newPet.breed.append(newPetBreed)
+					}
+				} else if let petBreed = a[i]["breeds"]! as? [String: [AnyObject]] {
 					for b in 0...2 {
 						let newPetBreedArray = petBreed["breed"]![b] as! [String: String]
 						let newPetBreed = newPetBreedArray["$t"]!
 						newPet.breed.append(newPetBreed)
 					}
+					
+				}
 				
-			}
-			
-			//get picture urls
-			if let v = a[i]["media"]!["photos"]! as? [String: [AnyObject]] {
-				
-				for p in 0...2 {
-					let thisAnimalPicture = v["photo"]![p] as! [String: String]
-					if p == 0 {
-						newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
-					} else if p == 2 {
-						newPet.imageURL = thisAnimalPicture["$t"]!
+				//get picture urls
+				if let v = a[i]["media"]!["photos"]! as? [String: [AnyObject]] {
+					
+					for p in 0...2 {
+						let thisAnimalPicture = v["photo"]![p] as! [String: String]
+						if p == 0 {
+							newPet.thumbnailImageURL = thisAnimalPicture["$t"]!
+						} else if p == 2 {
+							newPet.imageURL = thisAnimalPicture["$t"]!
+						}
 					}
 				}
+				self.returnedPets.append(newPet)
 			}
-			self.returnedPets.append(newPet)
-		}
 			
 		} catch {
 			print("something went wrong \(error.localizedDescription)")
@@ -206,16 +229,21 @@ class PetSearchViewController: UIViewController {
 	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 		if segue.identifier == "petDetails" {
 			let pdVC = segue.destination as! PetDetailsViewContoller
-				pdVC.thisPet = sender as! Pet
+			pdVC.thisPet = sender as! Pet
 		}
 	}
-
+	
 }
 
-extension PetSearchViewController: UISearchBarDelegate {
+extension PetSearchViewController: UISearchBarDelegate, UISearchControllerDelegate {
+	
+	func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+		performPetSearch(searchText: searchBar.scopeButtonTitles![selectedScope])
+	}
+	
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 		if !searchBar.text!.isEmpty {
-				performPetSearch(searchText: searchBar.text!)
+			performPetSearch(searchText: searchBar.text!)
 		}
 	}
 	
@@ -244,7 +272,7 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 			spinner.startAnimating()
 			return cell
 		} else {
-		
+			
 			let cell = tableView.dequeueReusableCell(withIdentifier: "searchResultCell", for: indexPath)
 			let imageView = cell.viewWithTag(1000) as! UIImageView
 			let nameLabel = cell.viewWithTag(1001) as! UILabel
@@ -255,9 +283,9 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 				nameLabel.text = " "
 				descriptionLabel.text = "Use the search bar above to find your new friend!"
 				cell.accessoryType = .none
-				performPetSearch(searchText: "rabbit")
+				
 			} else {
-			
+				
 				cell.accessoryType = .detailButton
 				
 				if let thumbnailURL = returnedPets[indexPath.row].thumbnailImageURL {
@@ -302,3 +330,4 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 	
 	
 }
+
