@@ -19,6 +19,8 @@ class PetSearchViewController: UIViewController {
 	var didSearch = false
 	//for activity indicator
 	var isLoading = false
+	
+	
 	//returned value from search
 	var returnedPets = [Pet]()
 	var imageDownloadTask: URLSessionDownloadTask?
@@ -30,8 +32,7 @@ class PetSearchViewController: UIViewController {
 		tableview.contentInset = UIEdgeInsets(top: 94, left: 0, bottom: 0, right: 0	)
 		searchBar.scopeButtonTitles = scopeButtonTitles
 		searchBar.showsScopeBar = true
-		//searchBar.placeholder = "Use the category tabs below"
-		navigationController?.title = "Search for your new friend!"
+		//initial search
 		performPetSearch(searchText: "rabbit")
 	}
 	
@@ -40,11 +41,12 @@ class PetSearchViewController: UIViewController {
 		let action = UIAlertAction(title: "OK", style: .default, handler: nil)
 		alert.addAction(action)
 		present(alert, animated: true, completion: nil)
-		
 	}
 	
 	func petFinderURL(searchText: String) -> URL {
+		//set the search text to lowercase. Ask me about capital R
 		let lowerCaseSearchText = searchText.lowercased()
+		//encode search text for safe url querys  ex %20 for spacing
 		let encodedText = lowerCaseSearchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
 		
 		let urlString = String(format: "https://api.petfinder.com/pet.find?key=d62ea251b3e02d378ee3dcfbb39b37db&animal=%@&location=Raleigh,NC&format=json", encodedText)
@@ -56,10 +58,11 @@ class PetSearchViewController: UIViewController {
 	
 	func performPetSearch(searchText: String) {
 		
+		//tells app there has been a search
 		didSearch = true
-		//add searchText to quite warning of searchbar is only availabe on main thread.
-		//let searchText = searchBar.text!
+		
 		searchBar.resignFirstResponder()
+		//turns on activity indicator
 		isLoading = true
 		tableview.reloadData()
 		
@@ -95,9 +98,8 @@ class PetSearchViewController: UIViewController {
 		
 	}
 	
-	
-	
 	func parse(dictionary: Data) -> [Pet] {
+		
 		//breaks down the first dictionary petfinder
 		do {
 			let json = try JSONSerialization.jsonObject(with: dictionary, options: []) as! [String: Any]
@@ -111,23 +113,32 @@ class PetSearchViewController: UIViewController {
 				print("Expected 'pet array'")
 				//user entered a non-category throw alert
 				let alert = UIAlertController(title: "Sorry no matches", message: "Limit your search to the tabs below the search box. Please try again.", preferredStyle: .alert)
-				let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+				let action = UIAlertAction(title: "OK", style: .default, handler: { _ in
+					self.isLoading = false
+					self.tableview.reloadData()
+				})
 				alert.addAction(action)
 				present(alert, animated: true, completion: nil)
+				//tableview.reloadData()
 				return []
 			}
 			
 			
 			//if a user searches for an existing category and the return is 0 throw alert
 			if  resultPetsArray["pet"] == nil {
+				
 				let alert = UIAlertController(title: "Sorry no matches", message: "Limit your search to the tabs below the search box. Please try again.", preferredStyle: .alert)
-				let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+				let action = UIAlertAction(title: "OK", style: .default, handler: { _ in
+					self.isLoading = false
+					self.tableview.reloadData()
+				})
 				alert.addAction(action)
 				present(alert, animated: true, completion: nil)
+				//tableview.reloadData()
 				return []
 			}
 			
-			//gets the total number of pets returned.  25 is the max from the petFinder api
+			//gets the total number of pets returned.
 			var petCount = resultPetsArray["pet"]!.count as Int
 			// decrease petcount for looping
 			if petCount > 0 {
@@ -138,19 +149,18 @@ class PetSearchViewController: UIViewController {
 				alert.addAction(action)
 				present(alert, animated: true, completion: nil)
 			}
-			
+			//There are pets in this documents.
 			let a = resultPetsArray["pet"]! as! Array<[String: AnyObject]>
 			
 			for i in 0...petCount {
 				let newPet = Pet()
-				//goes through pet object until it finds the name
+				//pet name, description, age, sex, size, id, first layer of dictionary
 				if let thisAnimalName = a[i]["name"]!["$t"]! {
-					//print(thisAnimalName)
 					newPet.name = thisAnimalName as? String
 				} else {
 					newPet.name = "No Name"
 				}
-				//goes through pet object until it finds the name
+				//goes through pet object until it finds the description
 				if let thisAnimalDescription = a[i]["description"]!["$t"]! {
 					newPet.description = thisAnimalDescription as? String
 				} else {
@@ -163,7 +173,7 @@ class PetSearchViewController: UIViewController {
 					newPet.age = "Age is unknown."
 				}
 				
-				if let thisAnimalSize = a[i]["age"]!["$t"]! {
+				if let thisAnimalSize = a[i]["size"]!["$t"]! {
 					newPet.size = thisAnimalSize as? String
 				} else {
 					newPet.size = "Size is unknown."
@@ -181,7 +191,7 @@ class PetSearchViewController: UIViewController {
 					newPet.gender = "ID is unknown."
 				}
 				
-				//get contact information
+				//contact information burried another layer down
 				if let contactInfo = a[i]["contact"]! as? [String: AnyObject] {
 					newPet.address1 = contactInfo["address1"]!["$t"]! as? String
 					newPet.city = contactInfo["city"]!["$t"]! as? String
@@ -191,7 +201,7 @@ class PetSearchViewController: UIViewController {
 					newPet.phoneNumber = contactInfo["phone"]!["$t"]! as? String
 				}
 				
-				//get breed
+				//breed could either be in a dictionary or another nested dictionary
 				if let petBreed = a[i]["breeds"]! as? [String: AnyObject] {
 					if let newPetBreed = petBreed["breed"]!["$t"] as? String {
 						newPet.breed.append(newPetBreed)
@@ -205,7 +215,7 @@ class PetSearchViewController: UIViewController {
 					
 				}
 				
-				//get picture urls
+				//get picture urls from nested dictionary of the 60px for thumbnails and 500px for large images
 				if let v = a[i]["media"]!["photos"]! as? [String: [AnyObject]] {
 					
 					for p in 0...2 {
@@ -236,11 +246,12 @@ class PetSearchViewController: UIViewController {
 }
 
 extension PetSearchViewController: UISearchBarDelegate, UISearchControllerDelegate {
-	
+	//search from scope buttons
 	func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
 		performPetSearch(searchText: searchBar.scopeButtonTitles![selectedScope])
+		searchBar.text = searchBar.scopeButtonTitles![selectedScope]
 	}
-	
+	// search from search box
 	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 		if !searchBar.text!.isEmpty {
 			performPetSearch(searchText: searchBar.text!)
@@ -326,8 +337,5 @@ extension PetSearchViewController: UITableViewDelegate, UITableViewDataSource {
 		}
 		
 	}
-	
-	
-	
 }
 

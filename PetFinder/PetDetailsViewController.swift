@@ -17,13 +17,9 @@ class PetDetailsViewContoller: UIViewController {
 	@IBOutlet weak var PetBreedLabel: UILabel!
 	@IBOutlet weak var PetImageView: UIImageView!
 	@IBOutlet weak var PetContactDescriptionTableView: UITableView!
-//	@IBOutlet weak var ShelterEmailLabel: UILabel!
-//	@IBOutlet weak var ShelterPhoneLabel: UILabel!
-//	@IBOutlet weak var ShelterAddressLabel: UILabel!
-//	@IBOutlet weak var PetDescriptionLabel: UILabel!
-	
-	
+	//pet object received from pet search VC
 	var thisPet = Pet()
+	//download task for images
 	var imageDownloadTask: URLSessionDownloadTask?
 	
 	override func viewDidLoad() {
@@ -35,6 +31,7 @@ class PetDetailsViewContoller: UIViewController {
 		PetSizeLabel.text = "Size: \(thisPet.size!)"
 		PetGenderLabel.text = "Gender: \(thisPet.gender!)"
 		PetBreedLabel.text = "Breed:"
+		//loop thourgh breed array. Check to see if there are multiple breeds
 		if thisPet.breed.count == 1 {
 			PetBreedLabel.text = "Breed: \(thisPet.breed[0])"
 		} else if thisPet.breed.count > 1{
@@ -44,15 +41,11 @@ class PetDetailsViewContoller: UIViewController {
 				} else {
 					PetBreedLabel.text! += ", \(breed)"
 				}
-				
 			}
 		} else {
 			PetBreedLabel.text! += " Unknown"
 		}
-		
-		
-		
-		
+
 		
 		if let bigImageURL = thisPet.imageURL {
 			let imageURL = URL(string: bigImageURL)
@@ -61,7 +54,7 @@ class PetDetailsViewContoller: UIViewController {
 		} else {
 			PetImageView.image = UIImage(named: "NOICON")
 		}
-		
+		//allows the description row to be dynamic in height
 		PetContactDescriptionTableView.rowHeight = UITableView.automaticDimension
 		PetContactDescriptionTableView.estimatedRowHeight = 44
 	}
@@ -88,7 +81,7 @@ extension PetDetailsViewContoller: UITableViewDelegate, UITableViewDataSource {
 		case 0:
 			return "Contact \(thisPet.name!)"
 		default:
-			return "\(thisPet.name!) Description"
+			return "\(thisPet.name!)'s Description"
 		}
 	}
 	
@@ -120,6 +113,8 @@ extension PetDetailsViewContoller: UITableViewDelegate, UITableViewDataSource {
 				contactTypeLabel.text = "Address"
 				if let petAddress = thisPet.address1, let petCity = thisPet.city, let petState = thisPet.state, let petZip = thisPet.zip {
 					contactLabel.text = "\(petAddress), \(petCity), \(petState) \(petZip)"
+				} else {
+					contactLabel.text = "Address missing"
 				}
 			default:
 				contactLabel.text = "Information is missing."
